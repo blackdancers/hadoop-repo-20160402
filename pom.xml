@@ -1,0 +1,191 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.hadoop</groupId>
+	<artifactId>hadoop-project</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>hadoop-project</name>
+	<description>parent</description>
+
+	<!-- 全局属性配置 -->
+	<profiles>
+		<!-- 开发环境 -->
+		<profile>
+			<id>main</id>
+			<properties>
+				<!-- 部署环境(对应配置文件版本) -->
+				<env>main</env>
+				<maven.test.skip>false</maven.test.skip>
+			</properties>
+			<!-- 设置默认环境 -->
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+
+		<!-- 开发环境 -->
+		<profile>
+			<id>dev</id>
+			<properties>
+				<!-- 部署环境(对应配置文件版本) -->
+				<env>dev</env>
+			</properties>
+		</profile>
+		<!-- 测试环境 -->
+		<profile>
+			<id>test</id>
+			<properties>
+				<!-- 部署环境(对应配置文件版本) -->
+				<env>test</env>
+			</properties>
+		</profile>
+	</profiles>
+
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<url>http://nexus:9090/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<url>http://nexus:9090/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<skip_maven_deploy>false</skip_maven_deploy>
+
+		<!-- project version -->
+		<project.version>1.0-SNAPSHOT</project.version>
+
+		<!-- frameworks -->
+		<org.springframework.version>4.2.5.RELEASE</org.springframework.version>
+		<shiro.version>1.2.4</shiro.version>
+		<hadoop.version>2.7.2</hadoop.version>
+	</properties>
+	<dependencies>
+		<!-- Test Dependency Begin -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+		</dependency>
+		<!-- Test Dependency End -->
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>javax.persistence</groupId>
+				<artifactId>persistence-api</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-common -->
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-common</artifactId>
+				<version>${hadoop.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-hdfs -->
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-hdfs</artifactId>
+				<version>${hadoop.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-mapreduce-client-core -->
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-mapreduce-client-core</artifactId>
+				<version>${hadoop.version}</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-mapreduce-client-common -->
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-mapreduce-client-common</artifactId>
+				<version>${hadoop.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<packagingExcludes>WEB-INF/web.xml</packagingExcludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<failOnError>true</failOnError>
+					<verbose>true</verbose>
+					<compilerArgument>-nowarn</compilerArgument>
+					<encoding>UTF-8</encoding>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.16</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<uniqueVersion>false</uniqueVersion>
+					<skip>${skip_maven_deploy}</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
+	<modules>
+		<module>hadoop-java-api</module>
+	</modules>
+</project>
