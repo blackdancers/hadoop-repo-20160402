@@ -97,6 +97,14 @@ public class HadoopFileSystem {
 		
 	}
 	
+	@Test
+	public void delFile() throws IOException {
+		Path path = new Path("/home/data/api-test.txt");
+		fs.delete(path,true);//递归删除
+		System.out.println("ok.");
+		
+	}
+	
 	/**
 	 * 文件定位
 	 * @throws IOException
@@ -192,6 +200,36 @@ public class HadoopFileSystem {
 		}
 	}
 	
+	/**
+	 * 遍历文件
+	 * @throws IOException
+	 */
+	@Test
+	public void recursiveHdfsFiles() throws IOException {
+		Path rootPath = new Path("/");
+		FileStatus fileStatus = fs.getFileStatus(rootPath);
+		print(fileStatus);
+		
+	}
+
+	private void print(FileStatus fileStatus) {
+		Path path = fileStatus.getPath();
+		if (fileStatus.isDirectory()) {
+			System.out.println(path.toUri().getPath());
+			try {
+				FileStatus[] listStatus = fs.listStatus(path);
+				if (listStatus!=null && listStatus.length >0) {
+					for (FileStatus ff : listStatus) {
+						print(ff);
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else {
+			System.out.println(path.getParent()+"/"+path.getName());
+		}
+	}
 	
 	
 	
