@@ -31,7 +31,7 @@ private FileSystem fs;
 	
 	@Test
 	public void forChecksum() throws Exception  {
-		Path path = new Path("D:/temp_files/api-test.txt");
+		Path path = new Path("/home/ecmgr/help.txt");
 		try {
 			FSDataOutputStream fos = fs.create(path);
 			fos.write("hello".getBytes());
