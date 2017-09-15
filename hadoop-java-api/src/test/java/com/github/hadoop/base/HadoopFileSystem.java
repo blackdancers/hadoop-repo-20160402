@@ -4,8 +4,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -54,19 +56,41 @@ public class HadoopFileSystem {
 		Configuration conf = new Configuration();
 		try {
 			fs =FileSystem.get(conf);
+			URI defaultUri = FileSystem.getDefaultUri(conf);
+			System.err.println(defaultUri.toString());//hdfs://master:8020
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	@Test
+	public void fsInstance() throws Exception  {
+		Path path = new Path("hdfs://master:8020/home/data/api-test.txt");
+		FSDataInputStream fis = null;
+		try {
+			fs.setVerifyChecksum(false);
+			fis = fs.open(path);
+			FileOutputStream out = new FileOutputStream("D:/temp_files/api-test.txt");
+			IOUtils.copyBytes(fis, out, 4096,false);
+			//使用seek方法，将Hadoop文件系统中的一个文件标准输出显示两次
+			fis.seek(0);//go back to start of the file
+			
+			IOUtils.copyBytes(fis, System.out, 4096,false);
+		} finally {
+			IOUtils.closeStream(fis);
+		}
+	}
+	
+	@Test
 	public void writeFile() throws IOException {
-		Path path = new Path("hdfs://master:12306/home/data/api-test.txt");
+		Path path = new Path("hdfs://master:8020/home/data/api-test.txt");
 		FSDataOutputStream fsDataOutputStream = fs.create(path);//装饰流
+		//fsDataOutputStream.sync();
 		fsDataOutputStream.write("使用Hadoop的FileSystem实现文件读取".getBytes("UTF-8"));
-		fsDataOutputStream.flush();
-		fsDataOutputStream.close();
+		//fsDataOutputStream.flush();
+		//fsDataOutputStream.close();
 		fs.close();
+		
 	}
 	
 	/**
@@ -75,7 +99,7 @@ public class HadoopFileSystem {
 	 */
 	@Test
 	public void writeFileInReplication() throws IOException {
-		Path path = new Path("hdfs://master:12306/home/data/replication.txt");
+		Path path = new Path("hdfs://master:8020/home/data/replication.txt");
 		FSDataOutputStream fsDataOutputStream = fs.create(path,(short) 2);//装饰流
 		fsDataOutputStream.write("指定文件副本数".getBytes("UTF-8"));
 		fsDataOutputStream.flush();
@@ -85,7 +109,7 @@ public class HadoopFileSystem {
 	
 	@Test
 	public void readFile() throws IOException {
-		Path path = new Path("/home/data/api-test.txt");
+		Path path = new Path("/soft/help.txt");
 		FSDataInputStream fsDataInputStream = fs.open(path);
 		FileOutputStream out = new FileOutputStream("D:/temp_files/api-test.txt");
 		
@@ -95,6 +119,23 @@ public class HadoopFileSystem {
 		IOUtils.closeStream(out);
 		System.out.println("ok.");
 		
+	}
+	
+	@Test
+	public void getFileBlock() throws IOException {
+		Path path = new Path("/soft/help.txt");
+		FileStatus fileStatus = fs.getFileStatus(path);
+		long len = fileStatus.getLen();//得到文件长度，不用与数据节点交互
+		BlockLocation[] blockLocations = fs.getFileBlockLocations(fileStatus, 0, len);
+		for (BlockLocation blockLocation : blockLocations) {
+			String[] hosts = blockLocation.getHosts();
+			System.out.println(hosts);
+			String[] names = blockLocation.getNames();
+			for (String name : names) {
+				System.out.println(name);//数据节点的IP和端口
+			}
+			
+		}
 	}
 	
 	@Test
