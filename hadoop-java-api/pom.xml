@@ -33,6 +33,10 @@
 				<groupId>org.apache.hadoop</groupId>
 				<artifactId>hadoop-mapreduce-client-common</artifactId>
 			</dependency>
+			<dependency>
+				<groupId>com.hadoop.gplcompression</groupId>
+				<artifactId>hadoop-lzo</artifactId>
+			</dependency>
 	 </dependencies>
 	
 	

@@ -106,6 +106,13 @@
 				<artifactId>hadoop-mapreduce-client-common</artifactId>
 				<version>${hadoop.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>com.hadoop.gplcompression</groupId>
+				<artifactId>hadoop-lzo</artifactId>
+				<version>0.4.21</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 	<build>
