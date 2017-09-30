@@ -52,6 +52,7 @@ public class HadoopFileSystem {
 	
 	@Before
 	public void initConf() {
+		System.setProperty("hadoop.home.dir", "E:\\devTools\\hadoop-2.7.2");
 		//加载配置文件，需要手动指定，不然会使用默认jar包中的core-site.xml文件
 		Configuration conf = new Configuration();
 		try {
@@ -62,44 +63,22 @@ public class HadoopFileSystem {
 			e.printStackTrace();
 		}
 	}
-	
-	@Test
-	public void fsInstance() throws Exception  {
-		Path path = new Path("hdfs://master:8020/home/data/api-test.txt");
-		FSDataInputStream fis = null;
-		try {
-			fs.setVerifyChecksum(false);
-			fis = fs.open(path);
-			FileOutputStream out = new FileOutputStream("D:/temp_files/api-test.txt");
-			IOUtils.copyBytes(fis, out, 4096,false);
-			//使用seek方法，将Hadoop文件系统中的一个文件标准输出显示两次
-			fis.seek(0);//go back to start of the file
-			
-			IOUtils.copyBytes(fis, System.out, 4096,false);
-		} finally {
-			IOUtils.closeStream(fis);
-		}
-	}
-	
+
 	@Test
 	public void writeFile() throws IOException {
-		Path path = new Path("hdfs://master:8020/home/data/api-test.txt");
+		Path path = new Path("/home/data/api-test.txt");
 		FSDataOutputStream fsDataOutputStream = fs.create(path);//装饰流
-		//fsDataOutputStream.sync();
 		fsDataOutputStream.write("使用Hadoop的FileSystem实现文件读取".getBytes("UTF-8"));
-		//fsDataOutputStream.flush();
-		//fsDataOutputStream.close();
 		fs.close();
-		
 	}
-	
+
 	/**
 	 * 指定文件副本数
 	 * @throws IOException
 	 */
 	@Test
 	public void writeFileInReplication() throws IOException {
-		Path path = new Path("hdfs://master:8020/home/data/replication.txt");
+		Path path = new Path("/home/data/replication.txt");
 		FSDataOutputStream fsDataOutputStream = fs.create(path,(short) 2);//装饰流
 		fsDataOutputStream.write("指定文件副本数".getBytes("UTF-8"));
 		fsDataOutputStream.flush();
@@ -109,7 +88,7 @@ public class HadoopFileSystem {
 	
 	@Test
 	public void readFile() throws IOException {
-		Path path = new Path("/soft/help.txt");
+		Path path = new Path("/home/data/api-test.txt");
 		FSDataInputStream fsDataInputStream = fs.open(path);
 		FileOutputStream out = new FileOutputStream("D:/temp_files/api-test.txt");
 		

@@ -14,20 +14,35 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.DeflateCodec;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.hadoop.compression.lzo.LzoCodec;
+import java.io.IOException;
+import java.net.URI;
+
 
 public class SequenceFileTest {
 
+	private FileSystem fs;
+	private Configuration conf;
+
+	@Before
+	public void initConf() {
+		System.setProperty("hadoop.home.dir", "E:\\devTools\\hadoop-2.7.2");
+		//加载配置文件，需要手动指定，不然会使用默认jar包中的core-site.xml文件
+		conf = new Configuration();
+		try {
+			fs =FileSystem.get(conf);
+			URI defaultUri = FileSystem.getDefaultUri(conf);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	@Test
 	public void write() throws Exception {
-		Configuration conf = new Configuration();
-		//conf.set("", "");
-		FileSystem fileSystem = FileSystem.get(conf);
-		Path path = new Path("/home/ecmgr/seq.file");
-		Writer writer = SequenceFile.createWriter(fileSystem, conf, path, IntWritable.class, Text.class);
+		Path path = new Path("/home/data/seq.file");
+		Writer writer = SequenceFile.createWriter(fs, conf, path, IntWritable.class, Text.class);
 		for (int i = 1; i < 101; i++) {
 			writer.append(new IntWritable(i), new Text("jack"+i));
 		}
@@ -41,11 +56,9 @@ public class SequenceFileTest {
 	 */
 	@Test
 	public void writeWithSync() throws Exception {
-		Configuration conf = new Configuration();
-		//conf.set("", "");
-		FileSystem fileSystem = FileSystem.get(conf);
-		Path path = new Path("/home/ecmgr/seq.file");
-		Writer writer = SequenceFile.createWriter(fileSystem, conf, path, IntWritable.class, Text.class);
+
+		Path path = new Path("/home/data/seq.file");
+		Writer writer = SequenceFile.createWriter(fs, conf, path, IntWritable.class, Text.class);
 		for (int i = 1; i < 101; i++) {
 			if (i %5==0) {
 				writer.sync();//创建同步点
@@ -79,10 +92,8 @@ public class SequenceFileTest {
 	 */
 	@Test
 	public void readSeqFile() throws Exception {
-		Configuration conf = new Configuration();
-		FileSystem fileSystem = FileSystem.get(conf);
-		Path path = new Path("/home/ecmgr/seq.file");
-		Reader reader = new SequenceFile.Reader(fileSystem,path,conf);
+		Path path = new Path("/home/data/seq.file");
+		Reader reader = new SequenceFile.Reader(fs,path,conf);
 		IntWritable key = new IntWritable();
 		Text value = new Text();
 		while (reader.next(key,value)) {
